@@ -25,12 +25,15 @@ def multibeta(matrix, algo, compute_tour, output_tour):
     # plot(g)
 
     if compute_tour:
+        print('Using exact computation')
         exact_algo = concorde_asym
     else:
         # skip the (possibly expensive) exact computation by returning a dummy tour
+        print('Using dummy tour')
         exact_algo = lambda graph: {'cost': 0, 'tour': list(graph)}
 
     #  run(g, algo, 0, compute_tour, output_tour)
+    print('About to print "format_output" line?')
     print(format_output({**exact_algo(g), 'kernel_size': len(g)}, len(g), 0, compute_tour, output_tour))  # exact solution
 
     facs = sorted(asymmetry_factors(matrix), reverse=True)
@@ -52,14 +55,18 @@ def multibeta(matrix, algo, compute_tour, output_tour):
 
 def run(g, algo, beta, compute_tour, output_tour):
     if compute_tour:
+        print('Using exact computation')
         exact_algo = concorde_asym
     else:
+        print('Using dummy tour')
         # skip the expensive exact computation by returning a dummy tour
         exact_algo = lambda graph: {'cost': 0, 'tour': list(graph)}
 
     if algo == 'treedoubling':
+        print('About to run treedoubling')
         solution = g_treedoubling(g, exact_algo=exact_algo, beta=beta)
     elif algo == 'christofides':
+        print('About to run christofides')
         solution = g_christofides(g, exact_algo=exact_algo, vc_algo=vertex_cover, beta=beta)
     else:
         raise ValueError(f'invalid algo: {algo}')
@@ -124,7 +131,9 @@ def main():
 
     args = argparser.parse_args()
 
+    print('Parsed args, about to parse matrix')
     matrix = parser.parse(args.graph)
+    print('Parsed matrix, about to process matrix')
     # np.random.seed(0)
     # matrix = generate_cost_matrix(80, force_symmetry=0.5)
     # matrix = generate_oneway_matrix(80, oneways=0.1)
@@ -142,6 +151,7 @@ def main():
         fields.append('tour')
     print(', '.join(fields))
 
+    print('About to run')
     if args.multibeta:
         multibeta(matrix, args.algo, args.compute_tour, args.output_tour)
     else:
