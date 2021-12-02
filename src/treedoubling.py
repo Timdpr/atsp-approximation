@@ -13,6 +13,7 @@ from msa_wrapper import calc_msa
 # exact_algo must be a callable with signature: DiGraph -> {'cost': int, 'tour': [int]}
 def g_treedoubling(g, exact_algo=held_karp, beta=1.0):
     # 1. Dividing the graph into components
+    print('Dividing the graph into components')
     best_msa = None
     best_k = len(g)
     for start_node in g:
@@ -25,6 +26,7 @@ def g_treedoubling(g, exact_algo=held_karp, beta=1.0):
     one_way_edges = list(find_one_way_edges(msa.edges, g, beta))
 
     # degenerate case: no one-way edges in msa => just do tree doubling
+    print('degenerate case: no one-way edges in msa => just do tree doubling')
     if not one_way_edges:
         start_node = next(iter(g.nodes))
         tour = component_path(msa, g.nodes, start_node, start_node)
@@ -37,6 +39,7 @@ def g_treedoubling(g, exact_algo=held_karp, beta=1.0):
     components = list(weakly_connected_components(msa))
 
     # 2. Finding a tour of the components
+    print('Finding a tour of the components')
     meta_graph = nx.DiGraph()
     for (c1, nodes_1), (c2, nodes_2) in itertools.permutations(enumerate(components), 2):
         min_edge = cheapest_edge_between(nodes_1, nodes_2, g)
@@ -48,11 +51,13 @@ def g_treedoubling(g, exact_algo=held_karp, beta=1.0):
     in_nodes, out_nodes = get_in_and_out_nodes(meta_tour, meta_graph)
 
     # 3. Finding a Hamilton path for each component
+    print('Finding a Hamilton path for each component')
     eulerian_trails = [component_path(msa, comp_nodes, in_node, out_node)
                        for comp_nodes, in_node, out_node
                        in zip(components, in_nodes, out_nodes)]
 
     # 4. Combining the component tour with the paths
+    print('Combining the component tour with the paths')
     tour = []
     for comp_index in meta_tour:
         tour += eulerian_trails[comp_index]
