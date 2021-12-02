@@ -23,11 +23,13 @@ def find_aymm_edges(g, beta):
 
 # exact_algo must be a callable with signature: DiGraph -> {'cost': int, 'tour': [int]}
 def g_christofides(g, exact_algo=held_karp, vc_algo=vertex_cover, beta=1.0):
+    print('1')
     random.seed(0)
     asymm_edges = find_aymm_edges(g, beta)
     asymm_nodes = vc_algo(g.edge_subgraph(asymm_edges).to_undirected())
     symm_nodes = g.nodes() - asymm_nodes
-
+    
+    print('2')
     if len(symm_nodes) <= 1:
         return {**exact_algo(g), 'kernel_size': len(g)}
     elif len(asymm_nodes) <= 1:  # if the asymmetric tour is trivial, don't bother
@@ -35,15 +37,18 @@ def g_christofides(g, exact_algo=held_karp, vc_algo=vertex_cover, beta=1.0):
         tour = metric_shortcut(tour)
         return {'cost': tour_cost(tour, g), 'tour': tour, 'kernel_size': 0}
 
+    print('3')
     double_node = random.choice(tuple(symm_nodes))
     asymm_nodes.add(double_node)
 
+    print('4')
     asymm_tour = exact_algo(g.subgraph(asymm_nodes))['tour']
     undir_g = to_undirected(g.subgraph(symm_nodes))
     symm_tour = christofides(undir_g)
     rev_symm_tour = symm_tour[::-1]
     symm_tour = symm_tour if tour_cost(symm_tour, g) <= tour_cost(rev_symm_tour, g) else rev_symm_tour
 
+    print('5')
     asymm_tour = rotate(asymm_tour, asymm_tour.index(double_node) + 1)  # double node at end
     symm_tour = rotate(symm_tour, symm_tour.index(double_node))  # double node at start
     tour = metric_shortcut(asymm_tour + symm_tour)
